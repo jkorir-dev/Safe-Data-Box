@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Database, Mail, Lock, User, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { getFirebaseAuthErrorMessage } from '../utils/firebaseErrors';
 
 export default function RegisterPage() {
   const [name, setName] = useState('');
@@ -35,7 +36,7 @@ export default function RegisterPage() {
       await signup(email, password, name);
       navigate('/dashboard', { state: { message: 'Account created! Welcome to Safe Data Box Studio.' } });
     } catch (err) {
-      setError(err.message || 'Failed to create account.');
+      setError(getFirebaseAuthErrorMessage(err, 'Failed to create account.'));
     } finally {
       setIsSubmitting(false);
     }
@@ -48,7 +49,7 @@ export default function RegisterPage() {
       await loginWithGoogle();
       navigate('/dashboard');
     } catch (err) {
-      setError('Google sign-up failed or was cancelled.');
+      setError(getFirebaseAuthErrorMessage(err, 'Google sign-up failed. Please try again.'));
     } finally {
       setIsSubmitting(false);
     }
