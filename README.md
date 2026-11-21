@@ -6,7 +6,7 @@ Visitors can generate sample records right from the home page, while logged-in d
 
 Project Links
 
-- Live Site:
+- Live Site:https://safe-data-box.vercel.app/
 - Figma Wireframes: https://figma.com
 - Project Board: https://github.com
 
