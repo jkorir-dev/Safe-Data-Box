@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Database, Mail, Lock, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { getFirebaseAuthErrorMessage } from '../utils/firebaseErrors';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -26,7 +27,7 @@ export default function LoginPage() {
       await login(email, password);
       navigate('/dashboard');
     } catch (err) {
-      setError('Invalid email or password. Please try again.');
+      setError(getFirebaseAuthErrorMessage(err, 'Invalid email or password. Please try again.'));
     } finally {
       setIsSubmitting(false);
     }
@@ -39,7 +40,7 @@ export default function LoginPage() {
       await loginWithGoogle();
       navigate('/dashboard');
     } catch (err) {
-      setError('Google sign-in failed or was cancelled.');
+      setError(getFirebaseAuthErrorMessage(err, 'Google sign-in failed or was cancelled.'));
     } finally {
       setIsSubmitting(false);
     }
@@ -52,7 +53,7 @@ export default function LoginPage() {
       await loginWithGithub();
       navigate('/dashboard');
     } catch (err) {
-      setError('GitHub sign-in failed or was cancelled.');
+      setError(getFirebaseAuthErrorMessage(err, 'GitHub sign-in failed or was cancelled.'));
     } finally {
       setIsSubmitting(false);
     }
