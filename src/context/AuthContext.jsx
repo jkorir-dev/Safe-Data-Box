@@ -7,7 +7,7 @@ import {
   onAuthStateChanged,
   updateProfile,
 } from 'firebase/auth';
-import { auth, googleProvider } from '../services/firebase';
+import { auth, googleProvider, githubProvider } from '../services/firebase';
 
 const AuthContext = createContext(null);
 
@@ -39,6 +39,10 @@ export function AuthProvider({ children }) {
     return signInWithPopup(auth, googleProvider);
   }
 
+  function loginWithGithub() {
+    return signInWithPopup(auth, githubProvider);
+  }
+
   function logout() {
     return signOut(auth);
   }
@@ -57,6 +61,7 @@ export function AuthProvider({ children }) {
     signup,
     login,
     loginWithGoogle,
+    loginWithGithub,
     logout,
   };
 

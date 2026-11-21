@@ -11,7 +11,7 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const emailInputRef = useRef(null);
-  const { login, loginWithGoogle } = useAuth();
+  const { login, loginWithGoogle, loginWithGithub } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,7 +27,7 @@ export default function LoginPage() {
       await login(email, password);
       navigate('/dashboard');
     } catch (err) {
-      setError(getFirebaseAuthErrorMessage(err, 'Unable to sign in. Please try again.'));
+      setError(getFirebaseAuthErrorMessage(err, 'Invalid email or password. Please try again.'));
     } finally {
       setIsSubmitting(false);
     }
@@ -40,7 +40,20 @@ export default function LoginPage() {
       await loginWithGoogle();
       navigate('/dashboard');
     } catch (err) {
-      setError(getFirebaseAuthErrorMessage(err, 'Google sign-in failed. Please try again.'));
+      setError(getFirebaseAuthErrorMessage(err, 'Google sign-in failed or was cancelled.'));
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function handleGithubLogin() {
+    setError('');
+    setIsSubmitting(true);
+    try {
+      await loginWithGithub();
+      navigate('/dashboard');
+    } catch (err) {
+      setError(getFirebaseAuthErrorMessage(err, 'GitHub sign-in failed or was cancelled.'));
     } finally {
       setIsSubmitting(false);
     }
@@ -119,14 +132,28 @@ export default function LoginPage() {
           <div className="h-px bg-slate-800 flex-1" />
         </div>
 
-        <button
-          type="button"
-          onClick={handleGoogleLogin}
-          disabled={isSubmitting}
-          className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-100 font-medium rounded-lg transition cursor-pointer"
-        >
-          Continue with Google
-        </button>
+        <div className="space-y-2.5">
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            disabled={isSubmitting}
+            className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-100 font-medium rounded-lg transition cursor-pointer"
+          >
+            Continue with Google
+          </button>
+
+          <button
+            type="button"
+            onClick={handleGithubLogin}
+            disabled={isSubmitting}
+            className="w-full py-2.5 bg-slate-950 hover:bg-slate-800 border border-slate-700 text-slate-100 font-medium rounded-lg transition flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+              <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+            </svg>
+            <span>Continue with GitHub</span>
+          </button>
+        </div>
 
         <p className="text-center text-sm text-slate-400 mt-6">
           New to Safe Data Box?{' '}
