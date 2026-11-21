@@ -1,8 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Database, Mail, Lock, User, AlertCircle } from 'lucide-react';
+import { Database, Mail, Lock, User, AlertCircle, Github } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { getFirebaseAuthErrorMessage } from '../utils/firebaseErrors';
 
 export default function RegisterPage() {
   const [name, setName] = useState('');
@@ -13,7 +12,7 @@ export default function RegisterPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const nameInputRef = useRef(null);
-  const { signup, loginWithGoogle } = useAuth();
+  const { signup, loginWithGoogle, loginWithGithub } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -36,7 +35,50 @@ export default function RegisterPage() {
       await signup(email, password, name);
       navigate('/dashboard', { state: { message: 'Account created! Welcome to Safe Data Box Studio.' } });
     } catch (err) {
-      setError(getFirebaseAuthErrorMessage(err, 'Failed to create account.'));
+      setError(err.message || 'Failed to create account.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+import { useState, useRef, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Database, Mail, Lock, User, AlertCircle, Github } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+
+export default function RegisterPage() {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const nameInputRef = useRef(null);
+  const { signup, loginWithGoogle, loginWithGithub } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    nameInputRef.current?.focus();
+  }, []);
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setError('');
+
+    if (password.length < 6) {
+      return setError('Password must be at least 6 characters long.');
+    }
+    if (password !== confirmPassword) {
+      return setError('Passwords do not match.');
+    }
+
+    setIsSubmitting(true);
+    try {
+      await signup(email, password, name);
+      navigate('/dashboard', { state: { message: 'Account created! Welcome to Safe Data Box Studio.' } });
+    } catch (err) {
+      setError(err.message || 'Failed to create account.');
     } finally {
       setIsSubmitting(false);
     }
@@ -49,7 +91,20 @@ export default function RegisterPage() {
       await loginWithGoogle();
       navigate('/dashboard');
     } catch (err) {
-      setError(getFirebaseAuthErrorMessage(err, 'Google sign-up failed. Please try again.'));
+      setError('Google sign-up failed or was cancelled.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function handleGithubSignup() {
+    setError('');
+    setIsSubmitting(true);
+    try {
+      await loginWithGithub();
+      navigate('/dashboard');
+    } catch (err) {
+      setError('GitHub sign-up failed or was cancelled.');
     } finally {
       setIsSubmitting(false);
     }
@@ -164,14 +219,26 @@ export default function RegisterPage() {
           <div className="h-px bg-slate-800 flex-1" />
         </div>
 
-        <button
-          type="button"
-          onClick={handleGoogleSignup}
-          disabled={isSubmitting}
-          className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-100 font-medium rounded-lg transition cursor-pointer"
-        >
-          Sign up with Google
-        </button>
+        <div className="space-y-2.5">
+          <button
+            type="button"
+            onClick={handleGoogleSignup}
+            disabled={isSubmitting}
+            className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-100 font-medium rounded-lg transition cursor-pointer"
+          >
+            Sign up with Google
+          </button>
+
+          <button
+            type="button"
+            onClick={handleGithubSignup}
+            disabled={isSubmitting}
+            className="w-full py-2.5 bg-slate-950 hover:bg-slate-800 border border-slate-700 text-slate-100 font-medium rounded-lg transition flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <Github className="w-4 h-4" />
+            <span>Sign up with GitHub</span>
+          </button>
+        </div>
 
         <p className="text-center text-sm text-slate-400 mt-6">
           Already have an account?{' '}
@@ -183,3 +250,4 @@ export default function RegisterPage() {
     </div>
   );
 }
+

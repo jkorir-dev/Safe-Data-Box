@@ -1,8 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Database, Mail, Lock, AlertCircle } from 'lucide-react';
+import { Database, Mail, Lock, AlertCircle, Github } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { getFirebaseAuthErrorMessage } from '../utils/firebaseErrors';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -11,7 +10,7 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const emailInputRef = useRef(null);
-  const { login, loginWithGoogle } = useAuth();
+  const { login, loginWithGoogle, loginWithGithub } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,7 +26,7 @@ export default function LoginPage() {
       await login(email, password);
       navigate('/dashboard');
     } catch (err) {
-      setError(getFirebaseAuthErrorMessage(err, 'Unable to sign in. Please try again.'));
+      setError('Invalid email or password. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -40,7 +39,20 @@ export default function LoginPage() {
       await loginWithGoogle();
       navigate('/dashboard');
     } catch (err) {
-      setError(getFirebaseAuthErrorMessage(err, 'Google sign-in failed. Please try again.'));
+      setError('Google sign-in failed or was cancelled.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function handleGithubLogin() {
+    setError('');
+    setIsSubmitting(true);
+    try {
+      await loginWithGithub();
+      navigate('/dashboard');
+    } catch (err) {
+      setError('GitHub sign-in failed or was cancelled.');
     } finally {
       setIsSubmitting(false);
     }
@@ -119,14 +131,26 @@ export default function LoginPage() {
           <div className="h-px bg-slate-800 flex-1" />
         </div>
 
-        <button
-          type="button"
-          onClick={handleGoogleLogin}
-          disabled={isSubmitting}
-          className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-100 font-medium rounded-lg transition cursor-pointer"
-        >
-          Continue with Google
-        </button>
+        <div className="space-y-2.5">
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            disabled={isSubmitting}
+            className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-100 font-medium rounded-lg transition cursor-pointer"
+          >
+            Continue with Google
+          </button>
+
+          <button
+            type="button"
+            onClick={handleGithubLogin}
+            disabled={isSubmitting}
+            className="w-full py-2.5 bg-slate-950 hover:bg-slate-800 border border-slate-700 text-slate-100 font-medium rounded-lg transition flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <Github className="w-4 h-4" />
+            <span>Continue with GitHub</span>
+          </button>
+        </div>
 
         <p className="text-center text-sm text-slate-400 mt-6">
           New to Safe Data Box?{' '}
